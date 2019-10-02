@@ -1,28 +1,9 @@
-class Book:
-    def __init__(self, name: str, page_count: int):
-        self.name = name
-        self.page_count = page_count
-        self.pages_read = 0
+class TooManyPagesReadException(ValueError):
+    def __init__(self, book: "Book", pages: int):
+        self.msg = f"You tried to read {pages}, but {book.name} has {book.page_count} pages"
 
-    def __repr__(self):
-        return (
-            f"<Book {self.name}, read {self.pages_read} pages out of {self.page_count}>"
-        )
-
-    def read(self, pages: int):
-        self.pages_read += pages
-        print(f"You have now read {self.pages_read} pages out of {self.page_count}")
-
-
-python101 = Book("Python 101", 50)
-python101.read(35)
-python101.read(50)  # Whaaaat
-
-# -- Errors used to prevent things from happening --
-
-
-class TooManyPagesReadError(ValueError):
-    pass
+    def __str__(self):
+        return self.msg
 
 
 class Book:
@@ -33,20 +14,23 @@ class Book:
 
     def __repr__(self):
         return (
-            f"<Book {self.name}, read {self.pages_read} pages out of {self.page_count}>"
+            f"<Book {self.name}, {self.page_count} pages, {self.pages_read} read>"
         )
 
     def read(self, pages: int):
-        if self.pages_read + pages > self.page_count:
-            raise TooManyPagesReadError(
-                f"You tried to read {self.pages_read + pages} pages, but this book only has {self.page_count} pages."
-            )
-        self.pages_read += pages
-        print(f"You have now read {self.pages_read} pages out of {self.page_count}")
+        if pages+self.pages_read > self.page_count:
+            raise TooManyPagesReadException(book, pages)
+        else:
+            self.pages_read += pages
+            print(f"You have read {self.pages_read} now!")
 
 
-python101 = Book("Python 101", 50)
-python101.read(35)
-python101.read(
-    50
-)  # This now raises an error, which has a helpful name and a helpful error message.
+book = Book("ABC", 300)
+try:
+    book.read(500)
+except TooManyPagesReadException as e:
+    print(e)
+else:
+    print(f"Read successful!!")
+finally:
+    print(book)
